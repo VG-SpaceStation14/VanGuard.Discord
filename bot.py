@@ -264,6 +264,10 @@ async def cleanup_expired():
 @bot.event
 async def on_ready():
     print(f"Бот {bot.user} успешно подключен к Discord!")
+    await bot.change_presence(
+        status=discord.Status.online, 
+        activity=discord.Game(name="VanGuard SS14")
+    )
 
 @bot.event
 async def on_member_update(before: discord.Member, after: discord.Member):
