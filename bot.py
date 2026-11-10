@@ -102,7 +102,14 @@ class LinkModal(discord.ui.Modal, title='Привязка аккаунта SS14'
                     RETURNING user_id;
                 """, code, discord_id, tier)
                 
-            msg = "✅ Успешно привязано!" if result is not None else "❌ Код неверный или истек."
+            if result is not None:
+                if tier > 0:
+                    msg = f"✅ Успешно привязано!\n⭐ Ваш уровень спонсора: **Tier {tier}** (подписка активна 1 час, обновляется автоматически)."
+                else:
+                    msg = "✅ Успешно привязано! (Спонсорская роль не обнаружена)"
+            else:
+                msg = "❌ Код неверный или истек."
+                
             await interaction.response.send_message(msg, ephemeral=True)
             
         except asyncpg.UniqueViolationError:
@@ -146,6 +153,43 @@ async def unlink(interaction: discord.Interaction):
             await interaction.followup.send("❌ Ошибка БД. Попробуйте позже.", ephemeral=True)
         except Exception:
             pass
+
+@bot.tree.command(name="status", description="Проверить статус привязки и спонсора")
+@app_commands.guild_only()
+async def status(interaction: discord.Interaction):
+    await interaction.response.defer(ephemeral=True)
+    
+    try:
+        async with bot.db_pool.acquire() as conn:
+            row = await conn.fetchrow("""
+                SELECT status, sponsor_tier, sponsor_until 
+                FROM discord_link_requests 
+                WHERE discord_id = $1::bigint
+            """, interaction.user.id)
+
+        if not row or row['status'] != 'linked':
+            await interaction.followup.send("❌ Ваш Discord не привязан к аккаунту SS14. Используйте `/link`.", ephemeral=True)
+            return
+
+        tier = row['sponsor_tier']
+        until = row['sponsor_until']
+
+        is_active = until is not None and until.timestamp() > time.time()
+        
+        if is_active and tier > 0:
+            time_left = int((until.timestamp() - time.time()) / 60)
+            msg = f"✅ **Discord привязан**\n"
+            msg += f"⭐ Уровень спонсора: **Tier {tier}**\n"
+            msg += f"⏳ Подписка активна еще: **{time_left} мин.**"
+        else:
+            msg = "✅ **Discord привязан**\n"
+            msg += "❌ Активной спонсорской подписки нет."
+
+        await interaction.followup.send(msg, ephemeral=True)
+        
+    except Exception:
+        logging.exception("Ошибка в /status")
+        await interaction.followup.send("❌ Ошибка БД. Попробуйте позже.", ephemeral=True)
 
 CLAIM_SQL = """
     UPDATE discord_link_requests
