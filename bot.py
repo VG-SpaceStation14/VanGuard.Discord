@@ -121,6 +121,8 @@ async def link(interaction: discord.Interaction):
 @bot.tree.command(name="unlink", description="Отвязать аккаунт SS14")
 @app_commands.guild_only()
 async def unlink(interaction: discord.Interaction):
+    await interaction.response.defer(ephemeral=True)
+    
     try:
         async with bot.db_pool.acquire() as conn:
             query = """
@@ -135,12 +137,15 @@ async def unlink(interaction: discord.Interaction):
             deleted = await conn.fetchval(query, interaction.user.id)
             
         if deleted is not None:
-            await interaction.response.send_message("✅ Аккаунт отвязан.", ephemeral=True)
+            await interaction.followup.send("✅ Аккаунт отвязан.", ephemeral=True)
         else:
-            await interaction.response.send_message("❌ Ваш Discord не привязан.", ephemeral=True)
+            await interaction.followup.send("❌ Ваш Discord не привязан.", ephemeral=True)
     except Exception:
         logging.exception("Ошибка в /unlink")
-        await interaction.response.send_message("❌ Ошибка БД. Попробуйте позже.", ephemeral=True)
+        try:
+            await interaction.followup.send("❌ Ошибка БД. Попробуйте позже.", ephemeral=True)
+        except Exception:
+            pass
 
 CLAIM_SQL = """
     UPDATE discord_link_requests
