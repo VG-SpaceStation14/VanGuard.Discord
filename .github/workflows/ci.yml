@@ -43,5 +43,4 @@ jobs:
       env:
         TEST_DB_DSN: "postgresql://postgres:postgres@127.0.0.1:5432/test_db"
       run: |
-        cd VanGuard.Discord
         pytest -v tests/
