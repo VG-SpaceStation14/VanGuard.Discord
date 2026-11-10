@@ -2,7 +2,16 @@
   <img alt="VanGuard SS14" width="350" src="https://raw.githubusercontent.com/VG-SpaceStation14/VanGuardSS14/master/Resources/Textures/_VanGuard/Logo/logo.png" />
 </p>
 
-[![Discord](https://img.shields.io/badge/Discord-Наш%20сервер-E05A33?logo=discord&logoColor=white&style=for-the-badge&labelColor=1C1C1C)](https://discord.gg/nW73CdBYkg) [![Main Repo](https://img.shields.io/badge/VanGuard-SS14%20Repo-E05A33?logo=github&logoColor=white&style=for-the-badge&labelColor=1C1C1C)](https://github.com/VG-SpaceStation14/VanGuardSS14) [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white&style=for-the-badge&labelColor=1C1C1C)](https://www.python.org/) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-316192?logo=postgresql&logoColor=white&style=for-the-badge&labelColor=1C1C1C)](https://www.postgresql.org/)
+
+<div align="center">
+
+[![Discord](https://img.shields.io/badge/Discord-Наш%20сервер-E05A33?logo=discord&logoColor=white&style=for-the-badge&labelColor=1C1C1C)](https://discord.gg/nW73CdBYkg) 
+[![Сайт](https://img.shields.io/badge/Сайт-Наш%20сайт-E05A33?style=for-the-badge&labelColor=1C1C1C)](https://vanguardproject.ru/index.html)
+[![Main Repo](https://img.shields.io/badge/VanGuard-SS14%20Repo-E05A33?logo=github&logoColor=white&style=for-the-badge&labelColor=1C1C1C)](https://github.com/VG-SpaceStation14/VanGuardSS14) 
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white&style=for-the-badge&labelColor=1C1C1C)](https://www.python.org/) 
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-316192?logo=postgresql&logoColor=white&style=for-the-badge&labelColor=1C1C1C)](https://www.postgresql.org/)
+
+</div>
 
 ---
 
