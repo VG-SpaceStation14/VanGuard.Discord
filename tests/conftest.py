@@ -5,7 +5,7 @@ import os
 
 TEST_DB_DSN = os.getenv("TEST_DB_DSN", "postgresql://postgres:postgres@127.0.0.1:5432/test_db")
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture
 async def db_pool():
     pool = await asyncpg.create_pool(TEST_DB_DSN)
     
