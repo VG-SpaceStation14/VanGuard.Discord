@@ -60,8 +60,7 @@ class VGBot(commands.Bot):
                 if data.get("secret") != BOT_SECRET:
                     return web.json_response({"error": "Unauthorized"}, status=401)
                 async with self.db_pool.acquire() as conn:
-                    while await claim_one(conn):
-                        pass
+                    await claim_one(conn)
                 return web.json_response({"status": "OK"})
             except Exception as e:
                 logging.exception("Ошибка в HTTP API")
@@ -97,7 +96,12 @@ class VGBot(commands.Bot):
 intents = discord.Intents.default()
 intents.members = True
 
-bot = VGBot(command_prefix=commands.when_mentioned, intents=intents)
+bot = VGBot(
+    command_prefix=commands.when_mentioned, 
+    intents=intents,
+    heartbeat_timeout=60.0,
+    guild_ready_timeout=30.0
+)
 
 
 @bot.tree.error
@@ -141,7 +145,6 @@ class LinkModal(discord.ui.Modal, title='Привязка аккаунта SS14'
     async def on_submit(self, interaction: discord.Interaction):
         log.info("LinkModal.on_submit: дошло через %.2fс, ws latency %.2fс", ilag(interaction), bot.latency)
 
-        # Сразу подтверждаем, чтобы запрос к БД не упёрся в лимит 3 секунды
         try:
             await interaction.response.defer(ephemeral=True)
         except discord.NotFound:
@@ -208,6 +211,10 @@ class LinkModal(discord.ui.Modal, title='Привязка аккаунта SS14'
 @bot.tree.command(name="link", description="Привязать аккаунт SS14")
 @app_commands.guild_only()
 async def link(interaction: discord.Interaction):
+    if ilag(interaction) > 2.5:
+        log.warning(f"/link: interaction устарел на {ilag(interaction):.1f}с, игнорируем.")
+        return
+        
     log.info("/link: дошло через %.2fс, ws latency %.2fс", ilag(interaction), bot.latency)
     await interaction.response.send_modal(LinkModal())
 
@@ -215,6 +222,10 @@ async def link(interaction: discord.Interaction):
 @bot.tree.command(name="unlink", description="Отвязать аккаунт SS14")
 @app_commands.guild_only()
 async def unlink(interaction: discord.Interaction):
+    if ilag(interaction) > 2.5:
+        log.warning(f"/unlink: interaction устарел на {ilag(interaction):.1f}с, игнорируем.")
+        return
+
     log.info("/unlink: дошло через %.2fс, ws latency %.2fс", ilag(interaction), bot.latency)
     try:
         await interaction.response.defer(ephemeral=True)
@@ -254,6 +265,10 @@ async def unlink(interaction: discord.Interaction):
 @bot.tree.command(name="status", description="Проверить статус привязки и спонсора")
 @app_commands.guild_only()
 async def status(interaction: discord.Interaction):
+    if ilag(interaction) > 2.5:
+        log.warning(f"/status: interaction устарел на {ilag(interaction):.1f}с, игнорируем.")
+        return
+
     log.info("/status: дошло через %.2fс, ws latency %.2fс", ilag(interaction), bot.latency)
     try:
         await interaction.response.defer(ephemeral=True)
