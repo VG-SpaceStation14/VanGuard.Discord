@@ -201,10 +201,9 @@ async def status(interaction: discord.Interaction):
         is_active = until is not None and until.timestamp() > time.time()
         
         if is_active and tier > 0:
-            time_left = int((until.timestamp() - time.time()) / 60)
             msg = f"✅ **Discord привязан**\n"
             msg += f"⭐ Уровень спонсора: **Tier {tier}**\n"
-            msg += f"⏳ Подписка активна еще: **{time_left} мин.**"
+            msg += f"⏳ Статус подписки: **Активна**"
         else:
             msg = "✅ **Discord привязан**\n"
             msg += "❌ Активной спонсорской подписки нет."
