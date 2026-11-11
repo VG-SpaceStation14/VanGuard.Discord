@@ -128,7 +128,7 @@ class LinkModal(discord.ui.Modal, title='Привязка аккаунта SS14'
                 
             if result is not None:
                 if tier > 0:
-                    msg = f"✅ Успешно привязано!\n⭐ Ваш уровень спонсора: **Tier {tier}** (подписка активна 1 час, обновляется автоматически)."
+                    msg = f"✅ Успешно привязано!\n⭐ Ваш уровень спонсора: **Tier {tier}**"
                 else:
                     msg = "✅ Успешно привязано! (Спонсорская роль не обнаружена)"
             else:
@@ -152,7 +152,13 @@ async def link(interaction: discord.Interaction):
 @bot.tree.command(name="unlink", description="Отвязать аккаунт SS14")
 @app_commands.guild_only()
 async def unlink(interaction: discord.Interaction):
-    await interaction.response.defer(ephemeral=True)
+    try:
+        await interaction.response.defer(ephemeral=True)
+    except discord.errors.NotFound:
+        return
+    except Exception as e:
+        logging.error(f"Network error in /unlink defer: {e}")
+        return
     
     try:
         async with bot.db_pool.acquire() as conn:
@@ -181,7 +187,13 @@ async def unlink(interaction: discord.Interaction):
 @bot.tree.command(name="status", description="Проверить статус привязки и спонсора")
 @app_commands.guild_only()
 async def status(interaction: discord.Interaction):
-    await interaction.response.defer(ephemeral=True)
+    try:
+        await interaction.response.defer(ephemeral=True)
+    except discord.errors.NotFound:
+        return
+    except Exception as e:
+        logging.error(f"Network error in /status defer: {e}")
+        return
     
     try:
         async with bot.db_pool.acquire() as conn:
@@ -212,7 +224,10 @@ async def status(interaction: discord.Interaction):
         
     except Exception:
         logging.exception("Ошибка в /status")
-        await interaction.followup.send("❌ Ошибка БД. Попробуйте позже.", ephemeral=True)
+        try:
+            await interaction.followup.send("❌ Ошибка БД. Попробуйте позже.", ephemeral=True)
+        except Exception:
+            pass
 
 CLAIM_SQL = """
     UPDATE discord_link_requests
