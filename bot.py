@@ -6,9 +6,11 @@ import secrets
 import time
 import os
 import logging
+from aiohttp import web
 
 TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 DB_DSN = os.getenv("DB_DSN")
+BOT_SECRET = os.getenv("BOT_SECRET", "CHANGE_THIS_TO_A_RANDOM_SECRET_STRING")
 
 GUILD_ID_STR = os.getenv("GUILD_ID")
 ROLE_TIER_1_STR = os.getenv("ROLE_TIER_1")
@@ -33,6 +35,26 @@ class VGBot(commands.Bot):
         heartbeat_sponsors.start()
         cleanup_expired.start()
         
+        async def handle_generate(request):
+            try:
+                data = await request.json()
+                if data.get("secret") != BOT_SECRET:
+                    return web.json_response({"error": "Unauthorized"}, status=401)
+                async with self.db_pool.acquire() as conn:
+                    while await claim_one(conn):
+                        pass
+                return web.json_response({"status": "OK"})
+            except Exception as e:
+                logging.exception("Ошибка в HTTP API")
+                return web.json_response({"error": str(e)}, status=500)
+
+        app = web.Application()
+        app.router.add_post('/api/generate_code', handle_generate)
+        self.web_runner = web.AppRunner(app)
+        await self.web_runner.setup()
+        site = web.TCPSite(self.web_runner, '127.0.0.1', 8080)
+        await site.start()
+        
         if os.getenv("SYNC_COMMANDS") == "1":
             guild = discord.Object(id=GUILD_ID)
             self.tree.copy_global_to(guild=guild)
@@ -42,6 +64,8 @@ class VGBot(commands.Bot):
             print("Пропуск синхронизации команд. Используйте SYNC_COMMANDS=1 для обновления.")
 
     async def close(self):
+        if hasattr(self, "web_runner") and self.web_runner:
+            await self.web_runner.cleanup()
         pool = getattr(self, "db_pool", None)
         if pool:
             await pool.close()
